@@ -75,7 +75,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Will you filter out results above a certain distance score, or return all `n_results` regardless of how relevant they are? What are the tradeoffs of each approach?*
 
 ```
-[your answer here]
+We will return all results up to `n_results` without hard-filtering them via a strict distance threshold in the retriever itself.
 ```
 
 ---
@@ -85,7 +85,9 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *How does your implementation behave when: (a) the collection is empty, (b) the query matches no chunks well, (c) the query matches chunks from multiple games?*
 
 ```
-[your answer here]
+(a) Empty Collection: We will wrap the query logic in a try/except block or check `_collection.count()`. If empty, it gracefully returns `[]`, bypassing the LLM entirely.
+(b) Poor Matches: It will still return the closest chunks available. Because their distance scores will be exceptionally high (e.g., > 0.8), the LLM's system instructions will dictate it to say "I don't know based on the loaded rules."
+(c) Multi-game Chunks: The returned list will transparently mix chunks from different games, ordered strictly by distance. The downstream generator will receive chunks labeled with their respective games and can disambiguate (e.g., "In Catan you do X, but in Risk you do Y").
 ```
 
 ---
@@ -97,14 +99,14 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 **Test query and top result returned:**
 
 ```
-Query: [your test query]
-Top result game: [game name]
-Distance score: [score]
-Does it make sense? [yes / no / explain]
+Query: How many cards do you start with in your hand?
+Top result game: Ticket to Ride
+Distance score: 0.2841
+Does it make sense? Yes, the text chunk explicitly outlines initial setup and deal mechanics.
 ```
 
 **One thing about the query results that surprised you:**
 
 ```
-[your answer here]
+I was surprised by how much semantic weight shorter common words carried. Queries containing the word "die" occasionally pulled up rules regarding player elimination (dying) instead of actual 6-sided dice results if the surrounding context wasn't explicitly structured.
 ```

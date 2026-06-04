@@ -35,5 +35,39 @@ def generate_response(query, retrieved_chunks):
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
 
-    # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    # 1. Format the retrieved chunks into a structured context block
+    # Optional: You can filter out weak matches here (e.g., if item["distance"] > 0.7)
+    context_entries = []
+    for i, chunk in enumerate(retrieved_chunks, 1):
+        entry = f"Source {i} [Game: {chunk['game']}]:\n{chunk['text']}"
+        context_entries.append(entry)
+    
+    context_block = "\n\n---\n\n".join(context_entries)
+
+    # 2. Craft a strict system prompt to enforce grounding
+    system_prompt = (
+        "You are a strict rules assistant for board games. Your job is to answer the user's "
+        "question using ONLY the provided Context below. \n\n"
+        "CRITICAL RULES:\n"
+        "1. Rely only on the clear facts directly mentioned in the Context. Do not use outside knowledge "
+        "or assume/extrapolate rules not explicitly stated.\n"
+        "2. Always explicitly mention which game(s) the rules and answers are coming from based on the metadata provided.\n"
+        "3. If the Context does not contain the answer to the question, state clearly and honestly that "
+        "the answer is not in the loaded rules. Do not make up an answer."
+    )
+
+    user_prompt = f"Context:\n{context_block}\n\nQuestion: {query}"
+
+    # Call the Groq API
+    try:
+        completion = _client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.0,  # Low temperature reduces creativity and ensures factual consistency
+        )
+        return completion.choices[0].message.content
+    except Exception as e:
+        return f"An error occurred while generating the response: {str(e)}"

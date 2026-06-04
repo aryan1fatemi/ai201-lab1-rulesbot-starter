@@ -116,11 +116,11 @@ handle these cases better, at the cost of more implementation complexity.
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+1,424 chunks
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+I was surprised by how much variation there was in chunk counts between different rule books, despite the PDF files being roughly the same size.
 ```

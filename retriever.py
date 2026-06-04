@@ -68,5 +68,31 @@ def retrieve(query, n_results=N_RESULTS):
     if _collection.count() == 0:
         return []
 
-    # Your implementation here.
-    return []
+    results = _collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"],
+    )
+    
+
+    # query() returns parallel lists-of-lists, one inner list per query.
+    # We passed a single query, so the real results live at index [0].
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
+    return [
+        {
+            "text": documents[i],
+            "game": metadatas[i]["game"],
+            "distance": distances[i],
+        }
+        for i in range(len(documents))
+    ]
+    
+if __name__ == "__main__":
+    query = "what happens when you run out of disease cubes in Pandemic?"
+    print(f"Query: {query!r}\n")
+    for i, r in enumerate(retrieve(query)):
+        print(f"[{i}] {r['distance']:.4f}  {r['game']}")
+        print(f"    {r['text'][:120]!r}\n")

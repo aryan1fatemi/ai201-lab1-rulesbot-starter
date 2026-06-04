@@ -41,18 +41,13 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 
 *How will you format the retrieved chunks before passing them to the LLM? Describe the structure — not the code. Consider: will you label chunks by game? Include distance scores? Separate chunks with delimiters?*
 
-```
-[your answer here]
-```
-
 ---
 
 ### System prompt — grounding instruction
 
 *Write the exact system prompt instruction you will use to prevent the model from answering beyond the retrieved text. This is the most important design decision in this function.*
-
 ```
-[your answer here]
+Do not draw from training data when answering questions. Do not fill in knowledge gaps just use the information from text provided. 
 ```
 
 ---
@@ -104,10 +99,11 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 **Test query and response:**
 
 ```
-Query: [your test query]
-Response: [abbreviated response]
-Correctly grounded? [yes / no]
-Cited the right game? [yes / no]
+Query: How does attacking work in Risk?
+Response: According to the Risk rules.... [Source:Risk]
+Correctly grounded? yes
+Cited the right game? yes
+Improvements: I would more explicitely tell the LLM to cite proper sources each time it returns a response, because with my current spec, it picks and chooses when it wants to add references.
 ```
 
 **One thing you changed from your original spec after seeing the actual output:**
